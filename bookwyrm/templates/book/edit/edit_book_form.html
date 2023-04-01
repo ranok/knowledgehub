@@ -38,6 +38,15 @@
                 </div>
 
                 <div class="field">
+                    <label class="label" for="id_url">
+                        {% trans "URL:" %}
+                    </label>
+                    <input type="text" name="url" value="{{ form.url.value|default:'' }}" maxlength="255" class="input" id="id_url" aria-describedby="desc_url">
+
+                    {% include 'snippets/form_errors.html' with errors_list=form.url.errors id="desc_url" %}
+                </div>
+
+                <div class="field">
                     <label class="label" for="id_description">
                         {% trans "Description:" %}
                     </label>
@@ -136,12 +145,12 @@
 
         <section class="block">
             <h2 class="title is-4">
-                {% trans "Publication" %}
+                {% trans "Publication venue" %}
             </h2>
             <div class="box">
                 <div class="field">
                     <label class="label" for="id_publishers">
-                        {% trans "Publisher:" %}
+                        {% trans "Publisher / Venue:" %}
                     </label>
                     {{ form.publishers }}
                     <span class="help" id="desc_publishers_help">
@@ -249,7 +258,7 @@
 
         <section class="block">
             <h2 class="title is-4">
-                {% trans "Physical Properties" %}
+                {% trans "Properties" %}
             </h2>
             <div class="box">
                 <div class="columns">
@@ -288,7 +297,7 @@
 
         <section class="block">
             <h2 class="title is-4">
-                {% trans "Book Identifiers" %}
+                {% trans "Identifiers" %}
             </h2>
             <div class="box">
                 <div class="field">
@@ -307,6 +316,15 @@
                     {{ form.isbn_10 }}
 
                     {% include 'snippets/form_errors.html' with errors_list=form.isbn_10.errors id="desc_isbn_10" %}
+                </div>
+
+                <div class="field">
+                    <label class="label" for="id_citation_id">
+                        {% trans "Thinkst Citation ID:" %}
+                    </label>
+                    {{ form.citation_id }}
+
+                    {% include 'snippets/form_errors.html' with errors_list=form.citation_id.errors id="desc_citation_id_10" %}
                 </div>
 
                 <div class="field">

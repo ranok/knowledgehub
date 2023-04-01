@@ -42,9 +42,6 @@ class BookDataModel(ObjectMixin, BookWyrmModel):
     goodreads_key = fields.CharField(
         max_length=255, blank=True, null=True, deduplication_field=True
     )
-    bnf_id = fields.CharField(  # Bibliothèque nationale de France
-        max_length=255, blank=True, null=True, deduplication_field=True
-    )
     viaf = fields.CharField(
         max_length=255, blank=True, null=True, deduplication_field=True
     )
@@ -58,6 +55,9 @@ class BookDataModel(ObjectMixin, BookWyrmModel):
         max_length=255, blank=True, null=True, deduplication_field=True
     )
     isfdb = fields.CharField(
+        max_length=255, blank=True, null=True, deduplication_field=True
+    )
+    citation_id = fields.CharField(
         max_length=255, blank=True, null=True, deduplication_field=True
     )
     search_vector = SearchVectorField(null=True)
@@ -82,6 +82,14 @@ class BookDataModel(ObjectMixin, BookWyrmModel):
     def isfdb_link(self):
         """generate the url from the isfdb id"""
         return f"https://www.isfdb.org/cgi-bin/title.cgi?{self.isfdb}"
+
+    @property
+    def citation_link(self):
+        """generate the url from the isfdb id"""
+        stype = 'talk'
+        if self.__class__.__name__ == 'Author':
+            stype = 'speaker'
+        return f"https://citation.thinkst.com/{stype}/{self.citation_id}"
 
     class Meta:
         """can't initialize this model, that wouldn't make sense"""
@@ -112,6 +120,7 @@ class Book(BookDataModel):
     title = fields.TextField(max_length=255)
     sort_title = fields.CharField(max_length=255, blank=True, null=True)
     subtitle = fields.TextField(max_length=255, blank=True, null=True)
+    url = fields.TextField(max_length=255, blank=True, null=True)
     description = fields.HtmlField(blank=True, null=True)
     languages = fields.ArrayField(
         models.CharField(max_length=255), blank=True, default=list
@@ -133,6 +142,9 @@ class Book(BookDataModel):
     )
     first_published_date = fields.DateTimeField(blank=True, null=True)
     published_date = fields.DateTimeField(blank=True, null=True)
+    venue = fields.CharField(
+        max_length=255, blank=True, null=True, deduplication_field=True
+    )
 
     objects = InheritanceManager()
     field_tracker = FieldTracker(fields=["authors", "title", "subtitle", "cover"])
@@ -269,11 +281,11 @@ class Work(OrderedCollectionPageMixin, Book):
 
 # https://schema.org/BookFormatType
 FormatChoices = [
-    ("AudiobookFormat", _("Audiobook")),
-    ("EBook", _("eBook")),
-    ("GraphicNovel", _("Graphic novel")),
-    ("Hardcover", _("Hardcover")),
-    ("Paperback", _("Paperback")),
+    ("Book", _("Book")),
+    ("Paper", _("Paper")),
+    ("BlogPost", _("Blog Post")),
+    ("Talk", _("Talk")),
+    ("SocialMediaPost", _("Social media post"))
 ]
 
 

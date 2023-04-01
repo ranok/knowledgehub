@@ -26,7 +26,11 @@
     <div class="columns is-mobile">
         <div class="column">
             <h1 class="title" itemprop="name" dir="auto">
-                {{ book.title }}
+	      {% if book.url %}
+	      <a href="{{ book.url }}">{{ book.title }}</a>
+	      {% else %}
+              {{ book.title }}
+	      {% endif %}
             </h1>
 
             {% if book.subtitle or book.series %}
@@ -142,6 +146,20 @@
                         <span class="is-sr-only-mobile">{{ button_text }}</span>
                     </button>
                     {% include "book/sync_modal.html" with source="openlibrary.org" source_name="OpenLibrary" id="openlibrary_sync" %}
+                    {% endif %}
+                </p>
+                {% endif %}
+                {% if book.citation_id %}
+                <p>
+                    <a href="{{ book.citation_link }}" target="_blank" rel="nofollow noopener noreferrer">
+                        {% trans "View on Thinkst Citation" %}
+                    </a>
+                    {% if request.user.is_authenticated and perms.bookwyrm.edit_book %}
+                    <button class="button is-small button-paragraph" type="button" data-modal-open="citation_sync">
+                        <span class="icon icon-download" title="{{ button_text }}"></span>
+                        <span class="is-sr-only-mobile">{{ button_text }}</span>
+                    </button>
+                    {% include "book/sync_modal.html" with source="citation.thinkst.com" source_name="Citation" id="citation_sync" %}
                     {% endif %}
                 </p>
                 {% endif %}

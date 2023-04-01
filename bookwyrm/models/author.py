@@ -25,7 +25,9 @@ class Author(BookDataModel):
     isfdb = fields.CharField(
         max_length=255, blank=True, null=True, deduplication_field=True
     )
-
+    fedi_link = fields.CharField(
+        max_length=255, blank=True, null=True, deduplication_field=True
+    )
     website = fields.CharField(
         max_length=255, blank=True, null=True, deduplication_field=True
     )
@@ -51,6 +53,11 @@ class Author(BookDataModel):
         clean_isni = re.sub(r"\s", "", self.isni)
         return f"https://isni.org/isni/{clean_isni}"
 
+    @property
+    def citation_link(self):
+        """Generate the Citation URL from the ID"""
+        return f"https://citation.thinkst.com/speaker/{self.citation_id}"
+    
     @property
     def openlibrary_link(self):
         """generate the url from the openlibrary id"""

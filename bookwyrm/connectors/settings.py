@@ -1,3 +1,3 @@
 """ settings book data connectors """
 
-CONNECTORS = ["openlibrary", "inventaire", "bookwyrm_connector"]
+CONNECTORS = ["openlibrary", "bookwyrm_connector"]

@@ -7,7 +7,7 @@
     {% if book.title %}
         {% blocktrans with book_title=book.title %}Edit "{{ book_title }}"{% endblocktrans %}
     {% else %}
-        {% trans "Add Book" %}
+        {% trans "Add Publication" %}
     {% endif %}
 {% endblock %}
 
@@ -17,7 +17,7 @@
         {% if book.title %}
         {% blocktrans with book_title=book.title %}Edit "{{ book_title }}"{% endblocktrans %}
         {% else %}
-        {% trans "Add Book" %}
+        {% trans "Add Publication" %}
         {% endif %}
     </h1>
     {% if book.created_date %}
@@ -67,7 +67,7 @@
 >
     {% if confirm_mode %}
         <div class="box">
-            <h2 class="title is-4">{% trans "Confirm Book Info" %}</h2>
+            <h2 class="title is-4">{% trans "Confirm Publication Info" %}</h2>
             <div class="columns mb-4">
                 {% if author_matches %}
                 <input type="hidden" name="author-match-count" value="{{ author_matches|length }}">

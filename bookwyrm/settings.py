@@ -219,7 +219,7 @@ MAX_STREAM_LENGTH = env.int("MAX_STREAM_LENGTH", 200)
 
 STREAMS = [
     {"key": "home", "name": _("Home Timeline"), "shortname": _("Home")},
-    {"key": "books", "name": _("Books Timeline"), "shortname": _("Books")},
+    {"key": "books", "name": _("Publications Timeline"), "shortname": _("Publications")},
 ]
 
 # Search configuration

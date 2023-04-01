@@ -42,6 +42,8 @@ class EditionForm(CustomForm):
             "asin",
             "aasin",
             "isfdb",
+            "citation_id",
+            "url",
         ]
         widgets = {
             "title": forms.TextInput(attrs={"aria-describedby": "desc_title"}),
@@ -77,6 +79,7 @@ class EditionForm(CustomForm):
             ),
             "pages": forms.NumberInput(attrs={"aria-describedby": "desc_pages"}),
             "isbn_13": forms.TextInput(attrs={"aria-describedby": "desc_isbn_13"}),
+            "citation_id": forms.TextInput(attrs={"aria-describedby": "desc_citation_id"}),
             "isbn_10": forms.TextInput(attrs={"aria-describedby": "desc_isbn_10"}),
             "openlibrary_key": forms.TextInput(
                 attrs={"aria-describedby": "desc_openlibrary_key"}
@@ -109,6 +112,7 @@ class EditionFromWorkForm(CustomForm):
             "title",
             "subtitle",
             "authors",
+            "url",
             "description",
             "languages",
             "series",
