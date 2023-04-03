@@ -145,7 +145,7 @@ class Book(BookDataModel):
     venue = fields.CharField(
         max_length=255, blank=True, null=True, deduplication_field=True
     )
-
+    arxiv_id = fields.CharField(max_length=128, blank=True, null=True)
     objects = InheritanceManager()
     field_tracker = FieldTracker(fields=["authors", "title", "subtitle", "cover"])
 
@@ -193,6 +193,10 @@ class Book(BookDataModel):
         """most recent readthrough activity"""
         return self.readthrough_set.order_by("-updated_date").first()
 
+    @property
+    def arxiv_link(self):
+        return f"https://arxiv.org/abs/{self.arxiv_id}"
+    
     @property
     def edition_info(self):
         """properties of this edition, as a string"""

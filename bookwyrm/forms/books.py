@@ -43,6 +43,7 @@ class EditionForm(CustomForm):
             "aasin",
             "isfdb",
             "citation_id",
+            "arxiv_id",
             "url",
         ]
         widgets = {
@@ -80,6 +81,7 @@ class EditionForm(CustomForm):
             "pages": forms.NumberInput(attrs={"aria-describedby": "desc_pages"}),
             "isbn_13": forms.TextInput(attrs={"aria-describedby": "desc_isbn_13"}),
             "citation_id": forms.TextInput(attrs={"aria-describedby": "desc_citation_id"}),
+            "arxiv_id": forms.TextInput(attrs={"aria-describedby": "desc_arxiv_id"}),
             "isbn_10": forms.TextInput(attrs={"aria-describedby": "desc_isbn_10"}),
             "openlibrary_key": forms.TextInput(
                 attrs={"aria-describedby": "desc_openlibrary_key"}

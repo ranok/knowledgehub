@@ -163,7 +163,21 @@
                     {% endif %}
                 </p>
                 {% endif %}
-                {% if book.inventaire_id %}
+                {% if book.arxiv_id %}
+                <p>
+                    <a href="{{ book.arxiv_link }}" target="_blank" rel="nofollow noopener noreferrer">
+                        {% trans "View on Arxiv" %}
+                    </a>
+                    {% if request.user.is_authenticated and perms.bookwyrm.edit_book %}
+                    <button class="button is-small button-paragraph" type="button" data-modal-open="arxiv_sync">
+                        <span class="icon icon-download" title="{{ button_text }}"></span>
+                        <span class="is-sr-only-mobile">{{ button_text }}</span>
+                    </button>
+                    {% include "book/sync_modal.html" with source="arxiv.org" source_name="Arxiv" id="arxiv_sync" %}
+                    {% endif %}
+                </p>
+                {% endif %}
+		{% if book.inventaire_id %}
                 <p>
                     <a href="{{ book.inventaire_link }}" target="_blank" rel="nofollow noopener noreferrer">
                         {% trans "View on Inventaire" %}

@@ -324,7 +324,16 @@
                     </label>
                     {{ form.citation_id }}
 
-                    {% include 'snippets/form_errors.html' with errors_list=form.citation_id.errors id="desc_citation_id_10" %}
+                    {% include 'snippets/form_errors.html' with errors_list=form.citation_id.errors id="desc_citation_id" %}
+                </div>
+
+		<div class="field">
+                    <label class="label" for="id_arxiv_id">
+                        {% trans "Arxiv ID:" %}
+                    </label>
+                    {{ form.arxiv_id }}
+
+                    {% include 'snippets/form_errors.html' with errors_list=form.arxiv_id.errors id="desc_arxiv_id" %}
                 </div>
 
                 <div class="field">
