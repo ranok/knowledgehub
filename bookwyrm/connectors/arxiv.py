@@ -1,7 +1,9 @@
 """ arxiv.org data connector """
-import re, feedparser
+import re, feedparser, time
+import asyncio, aiohttp
 
 from bookwyrm import models, activitypub
+from bookwyrm.settings import SEARCH_TIMEOUT, USER_AGENT
 from bookwyrm.book_search import SearchResult
 from .abstract_connector import AbstractConnector, Mapping, dict_from_mappings
 from .abstract_connector import get_data, infer_physical_format, unique_physical_format
@@ -50,6 +52,38 @@ class Connector(AbstractConnector):
             return data['entries'][0]
         raise ConnectorException("Unable to get " + remote_id)
 
+    async def get_results(self, session, url, min_confidence, query):
+        """try this specific connector"""
+        # pylint: disable=line-too-long
+        headers = {
+            "User-Agent": USER_AGENT,
+        }
+        params = {"min_confidence": min_confidence}
+        try:
+            async with session.get(url, headers=headers, params=params) as response:
+                if not response.ok:
+                    logger.info("Unable to connect to %s: %s", url, response.reason)
+                    return
+                
+                try:
+                    raw_data = await response.read()
+                    dict_data = feedparser.parse(raw_data)
+                except aiohttp.client_exceptions.ContentTypeError as err:
+                    logger.exception(err)
+                    return
+                
+                return {
+                    "connector": self,
+                    "results": self.process_search_response(
+                        query, dict_data, min_confidence
+                    ),
+                }
+        except asyncio.TimeoutError:
+            logger.info("Connection timed out for url: %s", url)
+        except aiohttp.ClientError as err:
+            logger.info(err)
+
+    
     def get_remote_id_from_data(self, data):
         """format a url from an arxiv id field"""
         try:
@@ -109,14 +143,12 @@ class Connector(AbstractConnector):
             yield author
 
     def parse_search_data(self, data, min_confidence):
-        for idx, search_result in enumerate(data.get("docs")):
+        for idx, search_result in enumerate(data.get("entries")):
             # build the remote id from the openlibrary key
-            key = self.books_url + search_result["key"]
-            author = search_result.get("author_name") or ["Unknown"]
-            cover_blob = search_result.get("cover_i")
-            cover = self.get_cover_url([cover_blob], size="M") if cover_blob else None
+            key = get_arxiv_id(search_result["id"])
+            author = [i['name'] for i in search_result.get("authors")]
 
-            # OL doesn't provide confidence, but it does sort by an internal ranking, so
+            # Arxiv doesn't provide confidence, but it does sort by an internal ranking, so
             # this confidence value is relative to the list position
             confidence = 1 / (idx + 1)
 
@@ -125,8 +157,7 @@ class Connector(AbstractConnector):
                 key=key,
                 author=", ".join(author),
                 connector=self,
-                year=search_result.get("first_publish_year"),
-                cover=cover,
+                year=time.strftime("%Y", search_result.get("published_parsed")),
                 confidence=confidence,
             )
 
