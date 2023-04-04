@@ -12,6 +12,7 @@ class BookData(ActivityObject):
     """shared fields for all book data and authors"""
 
     openlibraryKey: str = None
+    citationId: str = None
     inventaireId: str = None
     librarythingKey: str = None
     goodreadsKey: str = None
@@ -32,6 +33,7 @@ class Book(BookData):
     """serializes an edition or work, abstract"""
 
     title: str
+    url: str = None
     sortTitle: str = None
     subtitle: str = None
     description: str = ""
@@ -40,7 +42,8 @@ class Book(BookData):
     seriesNumber: str = ""
     subjects: List[str] = field(default_factory=lambda: [])
     subjectPlaces: List[str] = field(default_factory=lambda: [])
-
+    arxivId: str = None
+    venue : str = None
     authors: List[str] = field(default_factory=lambda: [])
     firstPublishedDate: str = ""
     publishedDate: str = ""
@@ -90,6 +93,7 @@ class Author(BookData):
     died: str = None
     aliases: List[str] = field(default_factory=lambda: [])
     bio: str = ""
+    fediLink: str = ""
     wikipediaLink: str = ""
     type: str = "Author"
     website: str = ""

@@ -137,9 +137,8 @@ class AbstractConnector(AbstractMinimalConnector):
         edition = edition_activity.to_model(
             model=models.Edition, overwrite=False, instance=instance
         )
-
-        # if we're updating an existing instance, we don't need to load authors
-        if instance:
+        # if we're updating an existing instance, we don't need to load authors unless there are none
+        if instance and len(instance.authors.all()) > 0:
             return edition
 
         if not edition.connector:
@@ -289,16 +288,19 @@ def get_image(url, timeout=10):
 class Mapping:
     """associate a local database field with a field in an external dataset"""
 
-    def __init__(self, local_field, remote_field=None, formatter=None):
+    def __init__(self, local_field, remote_field=None, second_remote_field=None, formatter=None):
         noop = lambda x: x
 
         self.local_field = local_field
         self.remote_field = remote_field or local_field
+        self.second_remote_field = second_remote_field
         self.formatter = formatter or noop
 
     def get_value(self, data):
         """pull a field from incoming json and return the formatted version"""
         value = data.get(self.remote_field)
+        if value and self.second_remote_field:
+            return self.formater(value, data.get(self.second_remote_field))
         if not value:
             return None
         try:
