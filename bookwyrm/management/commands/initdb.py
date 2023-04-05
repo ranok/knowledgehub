@@ -86,7 +86,7 @@ def init_connectors():
         covers_url="https://bookwyrm.social/images/",
         search_url="https://bookwyrm.social/search?q=",
         isbn_search_url="https://bookwyrm.social/isbn/",
-        priority=2,
+        priority=3,
     )
 
     # pylint: disable=line-too-long
@@ -99,7 +99,7 @@ def init_connectors():
         covers_url="https://inventaire.io",
         search_url="https://inventaire.io/api/search?types=works&types=works&search=",
         isbn_search_url="https://inventaire.io/api/entities?action=by-uris&uris=isbn%3A",
-        priority=1,
+        priority=3,
     )
 
     models.Connector.objects.create(
@@ -111,6 +111,18 @@ def init_connectors():
         covers_url="https://covers.openlibrary.org",
         search_url="https://openlibrary.org/search?q=",
         isbn_search_url="https://openlibrary.org/api/books?jscmd=data&format=json&bibkeys=ISBN:",
+        priority=2,
+    )
+
+    models.Connector.objects.create(
+        identifier="arxiv.org",
+        name="Arxiv",
+        connector_file="arxiv",
+        base_url="https://arxiv.org/abs/",
+        books_url="http://export.arxiv.org/api/query?id_list=",
+        covers_url="http://export.arxiv.org/api/query",
+        search_url="http://export.arxiv.org/api/query",
+        isbn_search_url="",
         priority=1,
     )
 
