@@ -61,7 +61,7 @@
         </section>
         {% endif %}
 
-        {% if links %}
+        {% if links or author.citation_id %}
         <section>
             <h2 class="title is-4">{% trans "External links" %}</h2>
             <div class="box">
@@ -69,6 +69,14 @@
                 <div>
                     <a itemprop="sameAs" href="{{ author.wikipedia_link }}" rel="nofollow noopener noreferrer" target="_blank">
                         {% trans "Wikipedia" %}
+                    </a>
+                </div>
+                {% endif %}
+
+		{% if author.citation_id %}
+                <div>
+                    <a itemprop="sameAs" href="{{ author.citation_link }}" rel="nofollow noopener noreferrer" target="_blank">
+                        {% trans "View on Thinkst Citation" %}
                     </a>
                 </div>
                 {% endif %}

@@ -57,6 +57,10 @@
 
             {% include 'snippets/form_errors.html' with errors_list=form.wikipedia_link.errors id="desc_wikipedia_link" %}
 
+	    <p class="field"><label class="label" for="id_citation_id">{% trans "Thinkst Citation ID:" %}</label> {{ form.citation_id }}</p>
+
+            {% include 'snippets/form_errors.html' with errors_list=form.citation_id.errors id="desc_citation_id" %}
+
             <p class="field"><label class="label" for="id_website">{% trans "Website:" %}</label> {{ form.website }}</p>
 
             {% include 'snippets/form_errors.html' with errors_list=form.website.errors id="desc_website" %}

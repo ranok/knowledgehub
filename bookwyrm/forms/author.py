@@ -15,6 +15,7 @@ class AuthorForm(CustomForm):
             "aliases",
             "bio",
             "wikipedia_link",
+            "citation_id",
             "website",
             "born",
             "died",
@@ -33,6 +34,7 @@ class AuthorForm(CustomForm):
                 attrs={"aria-describedby": "desc_wikipedia_link"}
             ),
             "website": forms.TextInput(attrs={"aria-describedby": "desc_website"}),
+            "citation_id": forms.TextInput(attrs={"aria-describedby": "desc_citation_id"}),
             "born": forms.SelectDateWidget(attrs={"aria-describedby": "desc_born"}),
             "died": forms.SelectDateWidget(attrs={"aria-describedby": "desc_died"}),
             "openlibrary_key": forms.TextInput(
