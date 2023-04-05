@@ -30,7 +30,7 @@ class Connector(AbstractConnector):
             Mapping("url", remote_field="link"),
             Mapping("id", remote_field="id", formatter=get_arxiv_id),
             Mapping("description", remote_field="summary"),
-            Mapping("arxiv_id", remote_field="id", formatter=get_arxiv_id),
+            Mapping("arxivId", remote_field="id", formatter=get_arxiv_id),
             Mapping(
                 "firstPublishedDate",
                 remote_field="published",
