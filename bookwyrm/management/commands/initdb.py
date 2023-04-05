@@ -90,17 +90,17 @@ def init_connectors():
     )
 
     # pylint: disable=line-too-long
-    models.Connector.objects.create(
-        identifier="inventaire.io",
-        name="Inventaire",
-        connector_file="inventaire",
-        base_url="https://inventaire.io",
-        books_url="https://inventaire.io/api/entities",
-        covers_url="https://inventaire.io",
-        search_url="https://inventaire.io/api/search?types=works&types=works&search=",
-        isbn_search_url="https://inventaire.io/api/entities?action=by-uris&uris=isbn%3A",
-        priority=3,
-    )
+    # models.Connector.objects.create(
+    #     identifier="inventaire.io",
+    #     name="Inventaire",
+    #     connector_file="inventaire",
+    #     base_url="https://inventaire.io",
+    #     books_url="https://inventaire.io/api/entities",
+    #     covers_url="https://inventaire.io",
+    #     search_url="https://inventaire.io/api/search?types=works&types=works&search=",
+    #     isbn_search_url="https://inventaire.io/api/entities?action=by-uris&uris=isbn%3A",
+    #     priority=3,
+    # )
 
     models.Connector.objects.create(
         identifier="openlibrary.org",
@@ -122,6 +122,18 @@ def init_connectors():
         books_url="http://export.arxiv.org/api/query?id_list=",
         covers_url="http://export.arxiv.org/api/query",
         search_url="http://export.arxiv.org/api/query",
+        isbn_search_url="",
+        priority=1,
+    )
+
+        models.Connector.objects.create(
+        identifier="citation.thinkst.com",
+        name="Citation",
+        connector_file="citation",
+        base_url="https://citation.thinkst.com/",
+        books_url="https://citation.thinkst.com/talk/",
+        covers_url="https://citation.thinkst.com/",
+        search_url="https://citation.thinkst.com/",
         isbn_search_url="",
         priority=1,
     )
