@@ -34,9 +34,9 @@
                 <div class="field has-addons">
                     <div class="control">
                         {% if user.is_authenticated %}
-                            {% trans "Search for a book, user, or list" as search_placeholder %}
+                            {% trans "Search for a publication, user, or list" as search_placeholder %}
                         {% else %}
-                            {% trans "Search for a book" as search_placeholder %}
+                            {% trans "Search for a publication" as search_placeholder %}
                         {% endif %}
                         <input aria-label="{{ search_placeholder }}" id="tour-search" class="input" type="text" name="q" placeholder="{{ search_placeholder }}" value="{{ query }}">
                     </div>

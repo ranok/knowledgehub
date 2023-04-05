@@ -86,7 +86,7 @@
                                         <input type="hidden" name="remote_id" value="{{ result.key }}">
                                         <div class="control">
                                             <button type="submit" class="button is-small is-link">
-                                                {% trans "Import book" %}
+                                                {% trans "Import publication" %}
                                             </button>
                                         </div>
                                     </form>
@@ -114,12 +114,12 @@
         </a>
         {% else %}
         <a href="{% url 'create-book' %}" id="tour-manually-add-book">
-            {% trans "Manually add book" %}
+            {% trans "Manually add publication" %}
         </a>
         {% endif %}
     {% else %}
         <a href="{% url 'login' %}">
-            {% trans "Log in to import or add books." %}
+            {% trans "Log in to import or add publications." %}
         </a>
     {% endif %}
 </p>
