@@ -28,7 +28,7 @@
     <meta itemprop="name" content="{{ author.name }}">
 
     {% firstof author.aliases author.born author.died as details %}
-    {% firstof author.wikipedia_link author.website author.openlibrary_key author.inventaire_id author.isni author.isfdb as links %}
+    {% firstof author.wikipedia_link author.website author.openlibrary_key author.inventaire_id author.isni author.isfdb author.citation_id as links %}
     {% if details or links %}
     <div class="column is-3">
         {% if details %}
@@ -61,7 +61,7 @@
         </section>
         {% endif %}
 
-        {% if links or author.citation_id %}
+        {% if links %}
         <section>
             <h2 class="title is-4">{% trans "External links" %}</h2>
             <div class="box">
