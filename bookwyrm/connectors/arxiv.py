@@ -142,10 +142,13 @@ class Connector(AbstractConnector):
                 continue
             yield author
 
+    def get_or_create_book(self, remote_id):
+        return super().get_or_create_book(get_arxiv_id(remote_id))
+            
     def parse_search_data(self, data, min_confidence):
         for idx, search_result in enumerate(data.get("entries")):
             # build the remote id from the openlibrary key
-            key = get_arxiv_id(search_result["id"])
+            key = self.base_url + get_arxiv_id(search_result["id"])
             author = [i['name'] for i in search_result.get("authors")]
 
             # Arxiv doesn't provide confidence, but it does sort by an internal ranking, so
