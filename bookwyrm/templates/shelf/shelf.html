@@ -36,7 +36,7 @@
             <ul>
                 <li class="{% if shelf.identifier == 'all' %}is-active{% endif %}">
                     <a href="{% url 'user-shelves' user|username %}"{% if shelf.identifier == 'all' %} aria-current="page"{% endif %}>
-                        {% trans "All books" %}
+                        {% trans "All publications" %}
                     </a>
                 </li>
                 {% for shelf_tab in shelves %}
@@ -61,7 +61,7 @@
                 <li>
                     <a href="{% url 'import' %}" id="tour-import-books">
                         <span class="icon icon-list" aria-hidden="true"></span>
-                        <span>{% trans "Import Books" %}</span>
+                        <span>{% trans "Import" %}</span>
                     </a>
                 </li>
             </ul>

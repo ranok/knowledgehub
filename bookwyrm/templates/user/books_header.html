@@ -1,7 +1,7 @@
 {% load i18n %}
 {% if is_self %}
     {% if shelf.identifier == 'all' %}
-        {% trans "Your books" %}
+        {% trans "Your publications" %}
     {% else %}
         {% include "snippets/translated_shelf_name.html" with shelf=shelf %}
     {% endif %}
