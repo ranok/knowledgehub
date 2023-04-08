@@ -54,7 +54,7 @@ class Connector(AbstractConnector):
     async def get_results(self, session, url, min_confidence, query):
         """try this specific connector"""
         # pylint: disable=line-too-long
-        data = search(query)
+        data = search(query, limit=10)
         return {
             "connector": self,
             "results": self.process_search_response(query, {'entries': data}, min_confidence)
