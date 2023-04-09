@@ -126,7 +126,7 @@ def init_connectors():
         priority=1,
     )
 
-        models.Connector.objects.create(
+    models.Connector.objects.create(
         identifier="citation.thinkst.com",
         name="Citation",
         connector_file="citation",
