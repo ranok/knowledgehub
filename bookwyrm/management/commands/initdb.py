@@ -121,7 +121,7 @@ def init_connectors():
         base_url="https://arxiv.org/abs/",
         books_url="http://export.arxiv.org/api/query?id_list=",
         covers_url="http://export.arxiv.org/api/query",
-        search_url="http://export.arxiv.org/api/query",
+        search_url="http://export.arxiv.org/api/query?search_query=",
         isbn_search_url="",
         priority=1,
     )
