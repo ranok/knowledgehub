@@ -31,7 +31,7 @@ class Connector(AbstractConnector):
             Mapping("url"),
             Mapping("id", remote_field="id", formatter=get_remote_id),
             Mapping("description", remote_field="summary"),
-            Mapping("citationId"),
+            Mapping("citationId", remote_field="citation_id"),
             Mapping("publishedDate", remote_field="date"),
             Mapping("publishers", remote_field="venue", formatter=wrap_str),
         ]
