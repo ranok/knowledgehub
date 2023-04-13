@@ -1,6 +1,6 @@
 """ citation.thinkst.com data connector """
 import re, feedparser, time
-import asyncio, aiohttp
+import asyncio, aiohttp, httpx
 from .citation_api import get_talk, get_author, search
 
 from bookwyrm import models, activitypub
@@ -54,11 +54,14 @@ class Connector(AbstractConnector):
     async def get_results(self, session, url, min_confidence, query):
         """try this specific connector"""
         # pylint: disable=line-too-long
-        data = search(query, limit=10)
-        return {
-            "connector": self,
-            "results": self.process_search_response(query, {'entries': data}, min_confidence)
-        }
+        try:
+            data = search(query, limit=10)
+            return {
+                "connector": self,
+                "results": self.process_search_response(query, {'entries': data}, min_confidence)
+            }
+        except httpx.HTTPError:
+            logger.info("Timeout for search on Citation.thinkst.com")
     
     def get_remote_id_from_data(self, data):
         """format a url from an arxiv id field"""
