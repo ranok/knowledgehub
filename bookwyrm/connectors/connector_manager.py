@@ -13,13 +13,14 @@ from requests import HTTPError
 
 from bookwyrm import book_search, models
 from bookwyrm.settings import SEARCH_TIMEOUT
-from bookwyrm.tasks import app, LOW
+from bookwyrm.tasks import app, CONNECTORS
 
 logger = logging.getLogger(__name__)
 
 
 class ConnectorException(HTTPError):
     """when the connector can't do what was asked"""
+
 
 async def async_connector_search(query, items, min_confidence):
     """Try a number of requests simultaneously"""
@@ -108,7 +109,7 @@ def get_or_create_connector(remote_id):
     return load_connector(connector_info)
 
 
-@app.task(queue=LOW, ignore_result=True)
+@app.task(queue=CONNECTORS)
 def load_more_data(connector_id, book_id):
     """background the work of getting all 10,000 editions of LoTR"""
     connector_info = models.Connector.objects.get(id=connector_id)
@@ -117,7 +118,7 @@ def load_more_data(connector_id, book_id):
     connector.expand_book_data(book)
 
 
-@app.task(queue=LOW, ignore_result=True)
+@app.task(queue=CONNECTORS)
 def create_edition_task(connector_id, work_id, data):
     """separate task for each of the 10,000 editions of LoTR"""
     connector_info = models.Connector.objects.get(id=connector_id)

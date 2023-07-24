@@ -19,7 +19,7 @@ from bookwyrm.models import (
     Review,
     ReviewRating,
 )
-from bookwyrm.tasks import app, LOW, IMPORTS
+from bookwyrm.tasks import app, IMPORT_TRIGGERED, IMPORTS
 from .fields import PrivacyLevels
 
 
@@ -252,9 +252,12 @@ class ImportItem(models.Model):
     @property
     def rating(self):
         """x/5 star rating for a book"""
-        if self.normalized_data.get("rating"):
+        if not self.normalized_data.get("rating"):
+            return None
+        try:
             return float(self.normalized_data.get("rating"))
-        return None
+        except ValueError:
+            return None
 
     @property
     def date_added(self):
@@ -327,7 +330,7 @@ class ImportItem(models.Model):
         )
 
 
-@app.task(queue=IMPORTS, ignore_result=True)
+@app.task(queue=IMPORTS)
 def start_import_task(job_id):
     """trigger the child tasks for each row"""
     job = ImportJob.objects.get(id=job_id)
@@ -346,7 +349,7 @@ def start_import_task(job_id):
     job.save()
 
 
-@app.task(queue=IMPORTS, ignore_result=True)
+@app.task(queue=IMPORTS)
 def import_item_task(item_id):
     """resolve a row into a book"""
     item = ImportItem.objects.get(id=item_id)
@@ -396,7 +399,7 @@ def handle_imported_book(item):
         shelved_date = item.date_added or timezone.now()
         ShelfBook(
             book=item.book, shelf=desired_shelf, user=user, shelved_date=shelved_date
-        ).save(priority=LOW)
+        ).save(priority=IMPORT_TRIGGERED)
 
     for read in item.reads:
         # check for an existing readthrough with the same dates
@@ -438,7 +441,7 @@ def handle_imported_book(item):
                     published_date=published_date_guess,
                     privacy=job.privacy,
                 )
-                review.save(software="bookwyrm", priority=LOW)
+                review.save(software="bookwyrm", priority=IMPORT_TRIGGERED)
         else:
             # just a rating
             review = ReviewRating.objects.filter(
@@ -455,7 +458,7 @@ def handle_imported_book(item):
                     published_date=published_date_guess,
                     privacy=job.privacy,
                 )
-                review.save(software="bookwyrm", priority=LOW)
+                review.save(software="bookwyrm", priority=IMPORT_TRIGGERED)
 
         # only broadcast this review to other bookwyrm instances
         item.linked_review = review

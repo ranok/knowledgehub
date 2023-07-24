@@ -8,7 +8,7 @@ from opentelemetry import trace
 
 from bookwyrm import models
 from bookwyrm.redis_store import RedisStore, r
-from bookwyrm.tasks import app, LOW, MEDIUM, HIGH
+from bookwyrm.tasks import app, STREAMS, IMPORT_TRIGGERED
 from bookwyrm.telemetry import open_telemetry
 
 
@@ -116,7 +116,7 @@ class ActivityStream(RedisStore):
         )
         # direct messages don't appear in feeds, direct comments/reviews/etc do
         if status.privacy == "direct" and status.status_type == "Note":
-            return []
+            return models.User.objects.none()
 
         # everybody who could plausibly see this status
         audience = models.User.objects.filter(
@@ -152,11 +152,11 @@ class ActivityStream(RedisStore):
     def get_audience(self, status):
         """given a status, what users should see it"""
         trace.get_current_span().set_attribute("stream_id", self.key)
-        audience = self._get_audience(status)
+        audience = self._get_audience(status).values_list("id", flat=True)
         status_author = models.User.objects.filter(
             is_active=True, local=True, id=status.user.id
-        )
-        return list({user.id for user in list(audience) + list(status_author)})
+        ).values_list("id", flat=True)
+        return list(set(list(audience) + list(status_author)))
 
     def get_stores_for_users(self, user_ids):
         """convert a list of user ids into redis store ids"""
@@ -186,12 +186,12 @@ class HomeStream(ActivityStream):
         if not audience:
             return []
         # if the user is following the author
-        audience = audience.filter(following=status.user)
+        audience = audience.filter(following=status.user).values_list("id", flat=True)
         # if the user is the post's author
         status_author = models.User.objects.filter(
             is_active=True, local=True, id=status.user.id
-        )
-        return list({user.id for user in list(audience) + list(status_author)})
+        ).values_list("id", flat=True)
+        return list(set(list(audience) + list(status_author)))
 
     def get_statuses_for_user(self, user):
         return models.Status.privacy_filter(
@@ -240,7 +240,7 @@ class BooksStream(ActivityStream):
 
         audience = super()._get_audience(status)
         if not audience:
-            return []
+            return models.User.objects.none()
         return audience.filter(shelfbook__book__parent_work=work).distinct()
 
     def get_audience(self, status):
@@ -343,7 +343,7 @@ def add_status_on_create(sender, instance, created, *args, **kwargs):
 
 def add_status_on_create_command(sender, instance, created):
     """runs this code only after the database commit completes"""
-    priority = HIGH
+    priority = STREAMS
     # check if this is an old status, de-prioritize if so
     # (this will happen if federation is very slow, or, more expectedly, on csv import)
     if instance.published_date < timezone.now() - timedelta(
@@ -353,7 +353,7 @@ def add_status_on_create_command(sender, instance, created):
         if instance.user.local:
             return
         # an out of date remote status is a low priority but should be added
-        priority = LOW
+        priority = IMPORT_TRIGGERED
 
     add_status_task.apply_async(
         args=(instance.id,),
@@ -497,7 +497,7 @@ def remove_statuses_on_unshelve(sender, instance, *args, **kwargs):
 # ---- TASKS
 
 
-@app.task(queue=LOW, ignore_result=True)
+@app.task(queue=STREAMS)
 def add_book_statuses_task(user_id, book_id):
     """add statuses related to a book on shelve"""
     user = models.User.objects.get(id=user_id)
@@ -505,7 +505,7 @@ def add_book_statuses_task(user_id, book_id):
     BooksStream().add_book_statuses(user, book)
 
 
-@app.task(queue=LOW, ignore_result=True)
+@app.task(queue=STREAMS)
 def remove_book_statuses_task(user_id, book_id):
     """remove statuses about a book from a user's books feed"""
     user = models.User.objects.get(id=user_id)
@@ -513,7 +513,7 @@ def remove_book_statuses_task(user_id, book_id):
     BooksStream().remove_book_statuses(user, book)
 
 
-@app.task(queue=MEDIUM, ignore_result=True)
+@app.task(queue=STREAMS)
 def populate_stream_task(stream, user_id):
     """background task for populating an empty activitystream"""
     user = models.User.objects.get(id=user_id)
@@ -521,7 +521,7 @@ def populate_stream_task(stream, user_id):
     stream.populate_streams(user)
 
 
-@app.task(queue=MEDIUM, ignore_result=True)
+@app.task(queue=STREAMS)
 def remove_status_task(status_ids):
     """remove a status from any stream it might be in"""
     # this can take an id or a list of ids
@@ -536,7 +536,7 @@ def remove_status_task(status_ids):
             )
 
 
-@app.task(queue=HIGH, ignore_result=True)
+@app.task(queue=STREAMS)
 def add_status_task(status_id, increment_unread=False):
     """add a status to any stream it should be in"""
     status = models.Status.objects.select_subclasses().get(id=status_id)
@@ -548,7 +548,7 @@ def add_status_task(status_id, increment_unread=False):
         stream.add_status(status, increment_unread=increment_unread)
 
 
-@app.task(queue=MEDIUM, ignore_result=True)
+@app.task(queue=STREAMS)
 def remove_user_statuses_task(viewer_id, user_id, stream_list=None):
     """remove all statuses by a user from a viewer's stream"""
     stream_list = [streams[s] for s in stream_list] if stream_list else streams.values()
@@ -558,7 +558,7 @@ def remove_user_statuses_task(viewer_id, user_id, stream_list=None):
         stream.remove_user_statuses(viewer, user)
 
 
-@app.task(queue=MEDIUM, ignore_result=True)
+@app.task(queue=STREAMS)
 def add_user_statuses_task(viewer_id, user_id, stream_list=None):
     """add all statuses by a user to a viewer's stream"""
     stream_list = [streams[s] for s in stream_list] if stream_list else streams.values()
@@ -568,7 +568,7 @@ def add_user_statuses_task(viewer_id, user_id, stream_list=None):
         stream.add_user_statuses(viewer, user)
 
 
-@app.task(queue=MEDIUM, ignore_result=True)
+@app.task(queue=STREAMS)
 def handle_boost_task(boost_id):
     """remove the original post and other, earlier boosts"""
     instance = models.Status.objects.get(id=boost_id)

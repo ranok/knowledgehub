@@ -21,7 +21,7 @@ from django.utils.http import http_date
 from bookwyrm import activitypub
 from bookwyrm.settings import USER_AGENT, PAGE_LENGTH
 from bookwyrm.signatures import make_signature, make_digest
-from bookwyrm.tasks import app, MEDIUM, BROADCAST
+from bookwyrm.tasks import app, BROADCAST
 from bookwyrm.models.fields import ImageField, ManyToManyField
 
 logger = logging.getLogger(__name__)
@@ -379,7 +379,7 @@ class CollectionItemMixin(ActivitypubMixin):
 
     activity_serializer = activitypub.CollectionItem
 
-    def broadcast(self, activity, sender, software="bookwyrm", queue=MEDIUM):
+    def broadcast(self, activity, sender, software="bookwyrm", queue=BROADCAST):
         """only send book collection updates to other bookwyrm instances"""
         super().broadcast(activity, sender, software=software, queue=queue)
 
@@ -400,7 +400,7 @@ class CollectionItemMixin(ActivitypubMixin):
             return []
         return [collection_field.user]
 
-    def save(self, *args, broadcast=True, priority=MEDIUM, **kwargs):
+    def save(self, *args, broadcast=True, priority=BROADCAST, **kwargs):
         """broadcast updated"""
         # first off, we want to save normally no matter what
         super().save(*args, **kwargs)
@@ -444,7 +444,7 @@ class CollectionItemMixin(ActivitypubMixin):
 class ActivityMixin(ActivitypubMixin):
     """add this mixin for models that are AP serializable"""
 
-    def save(self, *args, broadcast=True, priority=MEDIUM, **kwargs):
+    def save(self, *args, broadcast=True, priority=BROADCAST, **kwargs):
         """broadcast activity"""
         super().save(*args, **kwargs)
         user = self.user if hasattr(self, "user") else self.user_subject
@@ -506,7 +506,7 @@ def unfurl_related_field(related_field, sort_field=None):
     return related_field.remote_id
 
 
-@app.task(queue=BROADCAST, ignore_result=True)
+@app.task(queue=BROADCAST)
 def broadcast_task(sender_id: int, activity: str, recipients: List[str]):
     """the celery task for broadcast"""
     user_model = apps.get_model("bookwyrm.User", require_ready=True)
@@ -529,7 +529,7 @@ async def async_broadcast(recipients: List[str], sender, data: str):
 
 
 async def sign_and_send(
-    session: aiohttp.ClientSession, sender, data: str, destination: str
+    session: aiohttp.ClientSession, sender, data: str, destination: str, **kwargs
 ):
     """Sign the messages and send them in an asynchronous bundle"""
     now = http_date()
@@ -539,11 +539,19 @@ async def sign_and_send(
         raise ValueError("No private key found for sender")
 
     digest = make_digest(data)
+    signature = make_signature(
+        "post",
+        sender,
+        destination,
+        now,
+        digest=digest,
+        use_legacy_key=kwargs.get("use_legacy_key"),
+    )
 
     headers = {
         "Date": now,
         "Digest": digest,
-        "Signature": make_signature("post", sender, destination, now, digest),
+        "Signature": signature,
         "Content-Type": "application/activity+json; charset=utf-8",
         "User-Agent": USER_AGENT,
     }
@@ -554,6 +562,14 @@ async def sign_and_send(
                 logger.exception(
                     "Failed to send broadcast to %s: %s", destination, response.reason
                 )
+                if kwargs.get("use_legacy_key") is not True:
+                    logger.info("Trying again with legacy keyId header value")
+                    asyncio.ensure_future(
+                        sign_and_send(
+                            session, sender, data, destination, use_legacy_key=True
+                        )
+                    )
+
             return response
     except asyncio.TimeoutError:
         logger.info("Connection timed out for url: %s", destination)
